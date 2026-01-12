@@ -5,7 +5,8 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Password protection: Set SLIDEV_PASSWORD secret in repository settings to enable
+# Password protection: Set SLIDEV_PASSWORD variable in repository settings to enable
+# Password is embedded in the build via VITE_SLIDEV_PASSWORD environment variable
 # Leave empty/unset for public access
 
 permissions:
