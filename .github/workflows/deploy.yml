@@ -66,21 +66,24 @@ jobs:
 
           echo "Password protection enabled - encrypting HTML files..."
 
-          # Encrypt all index.html files in dist subdirectories
+          # Encrypt both index.html and 404.html files in dist subdirectories
+          # Both need to be encrypted for proper SPA routing on GitHub Pages
           for dir in dist/*/; do
             if [ -d "$dir" ]; then
               lang=$(basename "$dir")
-              if [ -f "$dir/index.html" ]; then
-                echo "Encrypting $dir/index.html"
-                staticrypt "$dir/index.html" \
-                  -p "$STATICRYPT_PASSWORD" \
-                  --short \
-                  --template-title "GEOSA HD Maps - $lang" \
-                  --template-instructions "Enter password to view the presentation" \
-                  --template-color-primary "#0070C0" \
-                  --template-color-secondary "#08353C" \
-                  -o "$dir/index.html"
-              fi
+              for file in index.html 404.html; do
+                if [ -f "$dir/$file" ]; then
+                  echo "Encrypting $dir/$file"
+                  staticrypt "$dir/$file" \
+                    -p "$STATICRYPT_PASSWORD" \
+                    --short \
+                    --template-title "GEOSA HD Maps - $lang" \
+                    --template-instructions "Enter password to view the presentation" \
+                    --template-color-primary "#0070C0" \
+                    --template-color-secondary "#08353C" \
+                    -o "$dir/$file"
+                fi
+              done
             fi
           done
 
