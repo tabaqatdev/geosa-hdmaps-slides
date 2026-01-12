@@ -59,6 +59,8 @@ jobs:
 
       - name: Password protect with StatiCrypt (if enabled)
         if: ${{ vars.SLIDEV_PASSWORD != '' }}
+        env:
+          STATICRYPT_PASSWORD: ${{ vars.SLIDEV_PASSWORD }}
         run: |
           npm install -g staticrypt
 
@@ -70,7 +72,8 @@ jobs:
               lang=$(basename "$dir")
               if [ -f "$dir/index.html" ]; then
                 echo "Encrypting $dir/index.html"
-                staticrypt "$dir/index.html" "${{ vars.SLIDEV_PASSWORD }}" \
+                staticrypt "$dir/index.html" \
+                  -p "$STATICRYPT_PASSWORD" \
                   --short \
                   --template-title "GEOSA HD Maps - $lang" \
                   --template-instructions "Enter password to view the presentation" \
