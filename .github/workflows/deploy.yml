@@ -1,0 +1,211 @@
+name: Deploy Slidev Presentations to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Password protection: Set SLIDEV_PASSWORD secret in repository settings to enable
+# Leave empty/unset for public access
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Detect and build slide files
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          mkdir -p dist
+
+          # Find all slides-*.md files and build each one
+          for file in slides-*.md; do
+            if [ -f "$file" ]; then
+              # Extract language code from filename (e.g., slides-ar.md -> ar)
+              lang=$(echo "$file" | sed 's/slides-\(.*\)\.md/\1/')
+              echo "Building $file -> dist/$lang/"
+              pnpm slidev build "$file" -o "dist/$lang" --base "/$REPO_NAME/$lang/"
+            fi
+          done
+
+          # Also check for slides.md (default)
+          if [ -f "slides.md" ]; then
+            echo "Building slides.md -> dist/default/"
+            pnpm slidev build slides.md -o dist/default --base "/$REPO_NAME/default/"
+          fi
+
+      - name: Password protect with StatiCrypt (if enabled)
+        if: ${{ vars.SLIDEV_PASSWORD != '' }}
+        run: |
+          npm install -g staticrypt
+
+          echo "Password protection enabled - encrypting HTML files..."
+
+          # Encrypt all index.html files in dist subdirectories
+          for dir in dist/*/; do
+            if [ -d "$dir" ]; then
+              lang=$(basename "$dir")
+              if [ -f "$dir/index.html" ]; then
+                echo "Encrypting $dir/index.html"
+                staticrypt "$dir/index.html" "${{ vars.SLIDEV_PASSWORD }}" \
+                  --short \
+                  --template-title "GEOSA HD Maps - $lang" \
+                  --template-instructions "Enter password to view the presentation" \
+                  --template-color-primary "#0070C0" \
+                  --template-color-secondary "#08353C" \
+                  -o "$dir/index.html"
+              fi
+            fi
+          done
+
+      - name: Generate index page
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+
+          # Start building the HTML
+          cat > dist/index.html << 'HEADER'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>GEOSA HD Maps Presentations</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                background: linear-gradient(135deg, #08353C 0%, #0A3D41 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              .container { text-align: center; padding: 2rem; }
+              h1 { color: #ffffff; font-size: 2.5rem; margin-bottom: 0.5rem; }
+              h2 { color: #3BF2FB; font-size: 1.5rem; font-weight: 400; margin-bottom: 3rem; }
+              .cards { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+              .card {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 1rem;
+                padding: 2rem 3rem;
+                text-decoration: none;
+                transition: transform 0.2s, box-shadow 0.2s;
+                min-width: 200px;
+              }
+              .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+              }
+              .card h3 { color: #0070C0; font-size: 1.5rem; margin-bottom: 0.5rem; }
+              .card p { color: #666; font-size: 0.9rem; }
+              .card.rtl h3 { font-family: 'Cairo', sans-serif; }
+            </style>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+          </head>
+          <body>
+            <div class="container">
+              <h1>GEOSA HD Maps</h1>
+              <h2>Regulatory & Technical Framework for Autonomous Vehicles</h2>
+              <div class="cards">
+          HEADER
+
+          # Language display names and RTL languages
+          declare -A LANG_NAMES=(
+            ["en"]="English"
+            ["ar"]="العربية"
+            ["default"]="Presentation"
+            ["fr"]="Français"
+            ["de"]="Deutsch"
+            ["es"]="Español"
+            ["zh"]="中文"
+            ["ja"]="日本語"
+            ["ko"]="한국어"
+          )
+
+          declare -A LANG_DESC=(
+            ["en"]="View in English"
+            ["ar"]="عرض العرض التقديمي"
+            ["default"]="View presentation"
+            ["fr"]="Voir en français"
+            ["de"]="Auf Deutsch ansehen"
+            ["es"]="Ver en español"
+            ["zh"]="查看中文版"
+            ["ja"]="日本語で見る"
+            ["ko"]="한국어로 보기"
+          )
+
+          RTL_LANGS="ar he fa ur"
+
+          # Generate cards for each built presentation
+          for dir in dist/*/; do
+            if [ -d "$dir" ]; then
+              lang=$(basename "$dir")
+              name="${LANG_NAMES[$lang]:-$lang}"
+              desc="${LANG_DESC[$lang]:-View presentation}"
+
+              # Check if RTL language
+              rtl_class=""
+              if [[ " $RTL_LANGS " =~ " $lang " ]]; then
+                rtl_class=" rtl"
+              fi
+
+              cat >> dist/index.html << EOF
+                <a href="./$lang/" class="card$rtl_class">
+                  <h3>$name</h3>
+                  <p>$desc</p>
+                </a>
+          EOF
+            fi
+          done
+
+          # Close HTML
+          cat >> dist/index.html << 'FOOTER'
+              </div>
+            </div>
+          </body>
+          </html>
+          FOOTER
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

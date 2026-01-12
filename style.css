@@ -1,0 +1,273 @@
+/* GEOSA Theme - Clean & Simple */
+
+:root {
+  /* GEOSA Color Palette */
+  --geosa-primary: #0070C0;
+  --geosa-secondary: #00B0F0;
+  --geosa-cyan: #3BF2FB;
+  --geosa-green: #006C35;
+  --geosa-accent: #6AB380;
+  --geosa-teal: #0A3D41;
+  --geosa-dark: #08353C;
+
+  /* Slidev Theme Integration */
+  --slidev-theme-primary: var(--geosa-primary);
+  --slidev-theme-secondary: var(--geosa-secondary);
+}
+
+/* ===========================================
+   DEFAULT SLIDES - Light bg.jpg background
+   =========================================== */
+.slidev-layout {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  color: #1A1A1A;
+}
+
+.slidev-layout h1 {
+  color: var(--geosa-primary);
+  font-weight: 700;
+}
+
+.slidev-layout h2 {
+  color: var(--geosa-teal);
+  font-weight: 600;
+}
+
+.slidev-layout h3 {
+  color: var(--geosa-secondary);
+  font-weight: 500;
+}
+
+.slidev-layout p,
+.slidev-layout li {
+  color: #333333;
+}
+
+.slidev-layout strong {
+  color: var(--geosa-primary);
+}
+
+/* ===========================================
+   COVER & SEPARATOR SLIDES - Dark cover.jpg
+   =========================================== */
+.slidev-layout.cover,
+.slidev-layout.intro,
+.slidev-layout.section,
+.slidev-layout.separator {
+  background-image: linear-gradient(rgba(8, 53, 60, 0.7), rgba(10, 61, 65, 0.8)), url('/cover.jpg');
+  background-size: cover;
+  background-position: center;
+  color: #ffffff;
+}
+
+.slidev-layout.cover h1,
+.slidev-layout.intro h1,
+.slidev-layout.section h1,
+.slidev-layout.separator h1 {
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slidev-layout.cover h2,
+.slidev-layout.intro h2,
+.slidev-layout.section h2,
+.slidev-layout.separator h2 {
+  color: var(--geosa-cyan);
+}
+
+.slidev-layout.cover h3,
+.slidev-layout.intro h3,
+.slidev-layout.section h3,
+.slidev-layout.separator h3 {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.slidev-layout.cover p,
+.slidev-layout.intro p,
+.slidev-layout.section p,
+.slidev-layout.separator p,
+.slidev-layout.cover li,
+.slidev-layout.intro li,
+.slidev-layout.section li,
+.slidev-layout.separator li {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.slidev-layout.cover strong,
+.slidev-layout.intro strong,
+.slidev-layout.section strong,
+.slidev-layout.separator strong {
+  color: var(--geosa-cyan);
+}
+
+/* ===========================================
+   CENTER LAYOUT - Inherits default bg
+   =========================================== */
+.slidev-layout.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===========================================
+   RTL SUPPORT FOR ARABIC
+   =========================================== */
+
+/* RTL base direction - applied when htmlAttrs.dir: rtl is set */
+html[dir="rtl"] .slidev-layout {
+  direction: rtl;
+  text-align: right;
+}
+
+/* RTL list styling */
+html[dir="rtl"] ul,
+html[dir="rtl"] ol {
+  padding-right: 2rem;
+  padding-left: 0;
+}
+
+html[dir="rtl"] ul > li {
+  margin-left: 0;
+  margin-right: 1.5rem;
+}
+
+/* RTL blockquote */
+html[dir="rtl"] .slidev-layout blockquote {
+  border-left: none;
+  border-right: 4px solid var(--geosa-cyan);
+}
+
+/* RTL table headers */
+html[dir="rtl"] .slidev-layout th {
+  text-align: right;
+}
+
+/* Center alignment for cover slides in RTL */
+html[dir="rtl"] .slidev-layout.cover {
+  text-align: center;
+}
+
+/* ===========================================
+   LISTS - Clean styling
+   =========================================== */
+.slidev-layout ul > li {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+}
+
+.slidev-layout ol > li {
+  list-style-type: decimal;
+}
+
+/* ===========================================
+   CODE & QUOTES
+   =========================================== */
+.slidev-layout blockquote {
+  border-left: 4px solid var(--geosa-cyan);
+  padding-left: 1rem;
+  background: rgba(0, 112, 192, 0.08);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+/* ===========================================
+   TABLES
+   =========================================== */
+.slidev-layout table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.slidev-layout th {
+  background: var(--geosa-primary);
+  color: white;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.slidev-layout td {
+  padding: 0.5rem;
+  border-bottom: 1px solid rgba(0, 112, 192, 0.2);
+}
+
+/* ===========================================
+   FULL DIAGRAM SLIDE
+   =========================================== */
+.slidev-layout.diagram-slide {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.diagram-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.diagram-wrapper svg {
+  max-width: 95%;
+  max-height: 95%;
+  width: auto;
+  height: auto;
+}
+
+/* Scale up Mermaid diagrams */
+.slidev-layout .mermaid {
+  transform: scale(2.5);
+  transform-origin: center center;
+}
+
+.diagram-wrapper .mermaid {
+  transform: scale(3);
+  transform-origin: center center;
+}
+
+/* ===========================================
+   GEOSA LOGO - Bottom left corner
+   =========================================== */
+.slidev-layout::after {
+  content: '';
+  position: absolute;
+  bottom: 0.5rem;
+  left: 1rem;
+  width: 80px;
+  height: 30px;
+  background-image: url('/geosa-logo-black.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left center;
+  opacity: 0.7;
+  z-index: 10;
+}
+
+/* RTL: Logo moves to bottom-left (visual left side) */
+html[dir="rtl"] .slidev-layout::after {
+  right: auto;
+  left: 1rem;
+}
+
+/* Hide logo on cover slides (they have their own branding) */
+.slidev-layout.cover::after {
+  display: none;
+}
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+.slidev-vclick-target {
+  transition: all 0.3s ease-in-out;
+}
+
+.slidev-vclick-hidden {
+  opacity: 0;
+  transform: translateY(10px);
+}
